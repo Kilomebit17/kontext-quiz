@@ -421,8 +421,12 @@ export default function Editor() {
           </Select>
         </section>
 
-        <div className="grid gap-5 lg:grid-cols-[18rem_1fr]">
-          <aside className="card flex flex-col gap-3 p-4" aria-label={t('editor.questions')}>
+        {/* min-w-0 on the grid children: otherwise wide rows (option inputs) stretch the column past the viewport on phones. */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[18rem_1fr]">
+          <aside
+            className="card flex min-w-0 flex-col gap-3 p-4"
+            aria-label={t('editor.questions')}
+          >
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold">{t('editor.questions')}</h2>
               <span className="text-sm text-fg-muted">
@@ -491,7 +495,7 @@ export default function Editor() {
           </aside>
 
           <section
-            className="card flex flex-col gap-5 p-5"
+            className="card flex min-w-0 flex-col gap-5 p-4 sm:p-5"
             aria-label={
               selected ? t('editor.questionN', { n: selectedIndex + 1 }) : t('editor.questions')
             }
@@ -620,7 +624,8 @@ function QuestionForm({
         </div>
       </div>
 
-      <fieldset>
+      {/* Fieldsets default to min-width: min-content, which breaks phone layouts. */}
+      <fieldset className="min-w-0">
         <legend className="mb-2 text-sm font-semibold text-fg-muted">{t('editor.type')}</legend>
         <div className="flex flex-wrap gap-2">
           {QUESTION_TYPES.map((type) => (
@@ -695,13 +700,13 @@ function QuestionForm({
       {question.type === 'info' ? (
         <p className="rounded-xl bg-bg px-4 py-3 text-sm text-fg-muted">{t('editor.infoHint')}</p>
       ) : question.type === 'text' ? (
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="flex min-w-0 flex-col gap-2">
           <legend className="mb-1 text-sm font-semibold text-fg-muted">
             {t('editor.acceptedAnswers')}
           </legend>
           <p className="text-sm text-fg-muted">{t('editor.acceptedHint')}</p>
           {question.options.map((o, i) => (
-            <div key={o.id} className="flex items-center gap-2">
+            <div key={o.id} className="flex min-w-0 items-center gap-2">
               <input
                 type="text"
                 value={o.text}
@@ -739,7 +744,7 @@ function QuestionForm({
           </Button>
         </fieldset>
       ) : (
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="flex min-w-0 flex-col gap-2">
           <legend className="mb-1 text-sm font-semibold text-fg-muted">
             {t('editor.options')}
           </legend>
@@ -752,7 +757,7 @@ function QuestionForm({
                 <div
                   key={o.id}
                   className={cn(
-                    'flex items-center gap-2 rounded-2xl border p-2',
+                    'flex min-w-0 items-center gap-2 rounded-2xl border p-2',
                     o.isCorrect ? 'border-success/60 bg-success/10' : 'border-line',
                   )}
                 >
@@ -780,7 +785,10 @@ function QuestionForm({
                       className="h-10 min-w-0 flex-1 rounded-lg border border-transparent bg-bg px-2 focus:border-amber focus:outline-none focus-visible:ring-4 focus-visible:ring-amber/60"
                     />
                   )}
-                  <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-semibold text-fg-muted">
+                  <label
+                    className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-semibold text-fg-muted"
+                    title={t('editor.markCorrect')}
+                  >
                     <input
                       type={question.type === 'multiple' ? 'checkbox' : 'radio'}
                       name={`correct-${question.id}`}
@@ -790,10 +798,12 @@ function QuestionForm({
                           ? setOption(o.id, { isCorrect: e.target.checked })
                           : setCorrectSingle(o.id)
                       }
+                      aria-label={t('editor.markCorrect')}
                       data-testid={`option-correct-${i}`}
                       className="size-5 accent-[var(--success)]"
                     />
-                    {t('editor.markCorrect')}
+                    {/* The word only fits next to the input from tablet width up. */}
+                    <span className="hidden sm:inline">{t('editor.markCorrect')}</span>
                   </label>
                   {!isTF && (
                     <IconButton
