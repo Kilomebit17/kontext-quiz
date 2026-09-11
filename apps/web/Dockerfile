@@ -12,7 +12,11 @@ COPY packages/shared packages/shared
 COPY apps/web apps/web
 ARG VITE_API_URL=""
 ARG VITE_SENTRY_DSN=""
+# Public site URL for canonical/Open Graph tags, robots.txt and sitemap.xml.
+# Defaults to the value in apps/web/.env.production when the build-arg is not given.
+ARG VITE_SITE_URL
 ENV VITE_API_URL=$VITE_API_URL VITE_SENTRY_DSN=$VITE_SENTRY_DSN
+ENV VITE_SITE_URL=${VITE_SITE_URL:-https://kontext-quiz.mooo.com}
 RUN pnpm --filter @kontext/web build
 
 FROM nginx:1.27-alpine AS runtime

@@ -17,6 +17,9 @@ Three supported targets. All of them run the same two images built from
 | `SENTRY_DSN`, `VITE_SENTRY_DSN` | Error reporting (optional)                                                                   |
 
 The web image bakes `VITE_API_URL` in at build time (`--build-arg VITE_API_URL=https://api.…`).
+It also bakes `VITE_SITE_URL` (canonical/Open Graph URLs, robots.txt, sitemap.xml); the default
+lives in `apps/web/.env.production` — pass `--build-arg VITE_SITE_URL=https://…` when the public
+domain changes.
 
 Migrations run via `node dist/db/migrate.js` before the server starts (Compose `command`, Fly `release_command`).
 
