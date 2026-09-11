@@ -1,0 +1,26 @@
+{
+  email admin@kontextquiz.app
+}
+
+# Player/host web app (static SPA)
+{$WEB_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy web:80
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+}
+
+# API + WebSocket
+{$API_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy server:4000 {
+    # Socket.IO long-polling + websocket upgrades pass through automatically.
+    flush_interval -1
+  }
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  }
+}

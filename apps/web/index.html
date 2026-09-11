@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#141B33" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Kontext Quiz — вікторина в реальному часі для класу, команди чи вечірки."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <!-- Fonts are self-hosted and declared in CSS with font-display: swap; they are deliberately not
+         preloaded so they never compete with the app bundle for bandwidth on slow connections. -->
+    <title>Kontext Quiz</title>
+  </head>
+  <body>
+    <noscript>
+      <div
+        style="
+          padding: 2rem;
+          font-family: system-ui;
+          color: #f4f6ff;
+          background: #141b33;
+          min-height: 100vh;
+        "
+      >
+        <h1>Kontext Quiz</h1>
+        <p>Для гри потрібен JavaScript. / JavaScript is required to play.</p>
+      </div>
+    </noscript>
+    <div id="root">
+      <!-- App-shell splash: painted before any JavaScript arrives, replaced by React on mount. -->
+      <div
+        aria-hidden="true"
+        style="
+          display: flex;
+          min-height: 100dvh;
+          align-items: center;
+          justify-content: center;
+          background: #141b33;
+          color: #f4f6ff;
+          font:
+            800 1.75rem/1 system-ui,
+            sans-serif;
+          letter-spacing: -0.02em;
+        "
+      >
+        Kontext&nbsp;<span style="color: #ff6b6b; font-weight: 500">Quiz</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

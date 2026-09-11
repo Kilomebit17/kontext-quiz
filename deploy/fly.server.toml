@@ -1,0 +1,42 @@
+# fly launch --config deploy/fly.server.toml --no-deploy
+# fly secrets set JWT_SECRET=... COOKIE_SECRET=... DATABASE_URL=... REDIS_URL=...
+app = "kontext-quiz-api"
+primary_region = "waw"
+
+[build]
+  dockerfile = "../apps/server/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "4000"
+  HOST = "0.0.0.0"
+  WEB_ORIGIN = "https://play.kontextquiz.app"
+  API_ORIGIN = "https://api.kontextquiz.app"
+  LOG_LEVEL = "info"
+
+[deploy]
+  release_command = "node dist/db/migrate.js"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  # Sticky sessions keep a game room on the instance that owns it. Redis-based
+  # forwarding covers the rest.
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 5000
+    soft_limit = 4000
+
+[[http_service.checks]]
+  interval = "15s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "1gb"

@@ -1,0 +1,27 @@
+{
+  "name": "kontext-quiz",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kontext Quiz — real-time multiplayer quiz game",
+  "packageManager": "pnpm@11.6.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter ./apps/* --filter ./packages/* dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @kontext/web test:e2e",
+    "test:load": "pnpm --filter @kontext/server test:load",
+    "db:migrate": "pnpm --filter @kontext/server db:migrate",
+    "db:seed": "pnpm --filter @kontext/server db:seed",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

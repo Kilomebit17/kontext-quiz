@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.turbo/
+playwright-report/
+test-results/
+apps/web/dev-dist/
+apps/server/drizzle/meta/_journal.json.bak
+.artillery/
+
+# Local reference image (not part of the app)
+apps/web/characters_image.png

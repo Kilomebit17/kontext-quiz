@@ -1,0 +1,11 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+allowBuilds:
+  esbuild: true
+  '@swc/core': true
+  '@tailwindcss/oxide': true
+  sharp: true
+  playwright: true
+  '@sentry/cli': true
+  workerd: true

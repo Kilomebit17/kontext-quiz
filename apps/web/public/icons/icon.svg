@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512">
+  <!-- Kontext: the four answer shapes tile (same mark as the header wordmark) -->
+  <rect width="64" height="64" rx="16" fill="#1C2447"/>
+  <path d="M9 21c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="#FF6B6B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M46 10l2.6 7.4L56 20l-7.4 2.6L46 30l-2.6-7.4L36 20l7.4-2.6z" fill="#2EC4B6"/>
+  <circle cx="18" cy="46" r="7.5" fill="none" stroke="#FFB627" stroke-width="4.5"/>
+  <path d="M46 36l9 10-9 10-9-10z" fill="#7C6FF0"/>
+</svg>

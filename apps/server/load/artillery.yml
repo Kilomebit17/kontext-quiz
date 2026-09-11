@@ -1,0 +1,46 @@
+# Artillery scenario for the Socket.IO join path (best effort).
+#
+#   npx artillery run apps/server/load/artillery.yml --target http://localhost:4000 -v '{"pin":"123456"}'
+#
+# Create a game first (POST /api/games) and pass its PIN via -v. Each virtual
+# user connects, syncs its clock, joins the lobby and idles for a while so the
+# host can start the game and observe broadcast fan-out.
+config:
+  target: 'http://localhost:4000'
+  engines:
+    socketio-v3: {}
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 20
+      name: ramp
+    - duration: 60
+      arrivalRate: 20
+      name: sustain
+  socketio:
+    transports: ['websocket']
+  variables:
+    pin: ['123456']
+  processor: './artillery-processor.cjs'
+
+scenarios:
+  - name: player joins lobby and idles
+    engine: socketio-v3
+    flow:
+      - emit:
+          channel: 'time:ping'
+          data: { t0: 0 }
+          acknowledge:
+            match:
+              json: '$.serverTime'
+      - function: 'setNickname'
+      - emit:
+          channel: 'player:join'
+          data:
+            pin: '{{ pin }}'
+            nickname: '{{ nickname }}'
+          acknowledge:
+            match:
+              json: '$.ok'
+              value: true
+      - think: 60

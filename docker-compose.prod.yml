@@ -1,0 +1,85 @@
+# Production on a single VPS: Caddy (auto-HTTPS) → web (static) + server (API/WebSocket).
+# Usage:
+#   cp .env.example .env   # fill in secrets, set WEB_ORIGIN/API_ORIGIN to your domains
+#   docker compose -f docker-compose.prod.yml up -d --build
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      WEB_DOMAIN: ${WEB_DOMAIN:-play.kontextquiz.app}
+      API_DOMAIN: ${API_DOMAIN:-api.kontextquiz.app}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - server
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${API_ORIGIN}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+    restart: unless-stopped
+    expose:
+      - '80'
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      DATABASE_URL: ${DATABASE_URL:-postgres://kontext:${POSTGRES_PASSWORD:-kontext}@postgres:5432/kontext}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+    expose:
+      - '4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Run migrations before starting.
+    command: ['sh', '-c', 'node dist/db/migrate.js && node dist/index.js']
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kontext
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kontext}
+      POSTGRES_DB: kontext
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kontext -d kontext']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

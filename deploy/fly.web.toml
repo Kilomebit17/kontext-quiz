@@ -1,0 +1,25 @@
+# fly launch --config deploy/fly.web.toml --no-deploy
+app = "kontext-quiz-web"
+primary_region = "waw"
+
+[build]
+  dockerfile = "../apps/web/Dockerfile"
+  [build.args]
+    VITE_API_URL = "https://api.kontextquiz.app"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  method = "GET"
+  path = "/"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
