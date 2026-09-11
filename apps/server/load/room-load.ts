@@ -75,7 +75,9 @@ async function main() {
   const res = await fetch(`${API_URL}/api/games`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ quiz: buildQuiz(QUESTIONS) }),
+    // Timer-driven room: the script advances phases itself, so the room must
+    // not auto-reveal the moment all 200 players have answered.
+    body: JSON.stringify({ quiz: buildQuiz(QUESTIONS), settings: { endWhenAllAnswered: false } }),
   })
   if (res.status !== 201) throw new Error(`create game failed: ${res.status} ${await res.text()}`)
   const game = (await res.json()) as { sessionId: string; pin: string; hostToken: string }

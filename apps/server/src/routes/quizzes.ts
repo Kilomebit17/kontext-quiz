@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { quizInputSchema, type Quiz } from '@kontext/shared'
-import { forbidden, noDatabase, notFound } from '../errors.js'
+import { forbidden, notFound } from '../errors.js'
 import { sanitizeQuizInput } from '../sanitize.js'
 
 export function canReadQuiz(quiz: Quiz, userId: string | null | undefined): boolean {
@@ -10,19 +10,14 @@ export function canReadQuiz(quiz: Quiz, userId: string | null | undefined): bool
 
 export async function quizRoutes(app: FastifyInstance): Promise<void> {
   const { store } = app
-  const requireDb = () => {
-    if (store.kind === 'memory') throw noDatabase()
-  }
   const auth = { preHandler: app.requireAuth }
 
   app.get('/api/quizzes', auth, async (request) => {
-    requireDb()
     const user = request.user!
     return { quizzes: await store.quizzes.listByOwner(user.id) }
   })
 
   app.post('/api/quizzes', auth, async (request, reply) => {
-    requireDb()
     const input = sanitizeQuizInput(quizInputSchema.parse(request.body))
     const quiz = await store.quizzes.create(request.user!.id, input)
     return reply.code(201).send({ quiz })
@@ -39,7 +34,6 @@ export async function quizRoutes(app: FastifyInstance): Promise<void> {
   })
 
   app.put<{ Params: { id: string } }>('/api/quizzes/:id', auth, async (request) => {
-    requireDb()
     const existing = await store.quizzes.get(request.params.id)
     if (!existing) throw notFound('QUIZ_NOT_FOUND', 'Quiz not found')
     if (existing.ownerId !== request.user!.id) throw forbidden()
@@ -50,7 +44,6 @@ export async function quizRoutes(app: FastifyInstance): Promise<void> {
   })
 
   app.delete<{ Params: { id: string } }>('/api/quizzes/:id', auth, async (request) => {
-    requireDb()
     const existing = await store.quizzes.get(request.params.id)
     if (!existing) throw notFound('QUIZ_NOT_FOUND', 'Quiz not found')
     if (existing.ownerId !== request.user!.id) throw forbidden()
@@ -62,7 +55,6 @@ export async function quizRoutes(app: FastifyInstance): Promise<void> {
     '/api/quizzes/:id/duplicate',
     auth,
     async (request, reply) => {
-      requireDb()
       const source = await store.quizzes.get(request.params.id)
       if (!source) throw notFound('QUIZ_NOT_FOUND', 'Quiz not found')
       if (!canReadQuiz(source, request.user!.id)) throw forbidden()
