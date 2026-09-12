@@ -315,12 +315,21 @@ function HostLobby({
         </p>
         <div className="flex flex-col items-center gap-2">
           <div
-            className="rounded-2xl bg-fg p-3"
+            className="rounded-2xl bg-fg p-3 sm:p-4"
             role="img"
             aria-label={t('a11y.qr')}
             data-testid="qr-code"
           >
-            <QRCodeSVG value={joinUrl} size={176} bgColor="#F4F6FF" fgColor="#141B33" level="M" />
+            {/* The SVG is vector, so CSS sizing keeps it crisp: phone-sized on a phone,
+                large enough to scan across a room from the projector. */}
+            <QRCodeSVG
+              value={joinUrl}
+              size={288}
+              bgColor="#F4F6FF"
+              fgColor="#141B33"
+              level="M"
+              className="size-44 sm:size-56 lg:size-72"
+            />
           </div>
           <p className="text-sm text-fg-muted">{t('game.scanQr')}</p>
           <div className="inline-flex max-w-full items-center gap-1 rounded-lg bg-bg-elev pl-3">
