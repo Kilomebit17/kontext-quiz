@@ -7,7 +7,10 @@ import { cn } from '@/lib/cn'
 interface TimerRingProps {
   deadline: number | null
   startedAt: number | null
+  /** Pixel size; with `fluid` it only sets the drawing geometry and CSS decides the rendered size. */
   size?: number
+  /** Let `className` size the ring (e.g. `size-16 md:size-28`) instead of the fixed `size`. */
+  fluid?: boolean
   /** Play tick sounds in the last 5 s (only one component per screen should). */
   ticks?: boolean
   className?: string
@@ -19,6 +22,7 @@ export function TimerRing({
   deadline,
   startedAt,
   size = 96,
+  fluid = false,
   ticks = true,
   className,
   onDone,
@@ -61,15 +65,16 @@ export function TimerRing({
       data-testid="timer"
       data-seconds={seconds}
       className={cn(
-        'relative inline-flex items-center justify-center',
+        // Size containment lets the number scale with the ring via `cqw`, whatever sets the size.
+        'relative inline-flex shrink-0 items-center justify-center [container-type:size]',
         urgent && 'animate-pulse-ring',
         className,
       )}
-      style={{ width: size, height: size }}
+      style={fluid ? undefined : { width: size, height: size }}
     >
       <svg
-        width={size}
-        height={size}
+        width="100%"
+        height="100%"
         viewBox={`0 0 ${size} ${size}`}
         aria-hidden="true"
         className="-rotate-90"
@@ -97,7 +102,7 @@ export function TimerRing({
       </svg>
       <span
         className="absolute font-heading font-extrabold tabular"
-        style={{ fontSize: size * 0.34, color }}
+        style={{ fontSize: '34cqw', color }}
         aria-hidden="true"
       >
         {seconds}

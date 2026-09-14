@@ -218,13 +218,23 @@
   }
 }
 
+/**
+ * The PIN must never wrap — a six-digit code broken in half is unreadable across a room.
+ * Below `lg` the lobby is one column, so the PIN may use most of the viewport; from `lg`
+ * the player-list sidebar takes ~22rem, which is why the wide range uses a smaller factor.
+ */
 @utility pin-display {
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: clamp(4rem, 14vw, 12rem);
+  font-size: clamp(3.25rem, 16vw, 12rem);
   line-height: 1;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  @media (width >= 64rem) {
+    font-size: clamp(4rem, 10vw, 12rem);
+  }
 }
 
 @utility card {

@@ -179,16 +179,12 @@ export default function HostGame() {
       <header className="flex h-14 shrink-0 items-center gap-3 px-4 sm:px-6">
         <Wordmark size="sm" />
         <span className="hidden truncate text-fg-muted sm:inline">{snapshot.quizTitle}</span>
-        {snapshot.status !== 'lobby' && (
-          <span
-            className="ml-2 rounded-full bg-bg-elev px-3 py-1 font-heading text-sm tabular"
-            data-testid="host-pin-small"
-          >
-            PIN {formatPin(snapshot.pin)}
-          </span>
-        )}
         <div className="ml-auto flex items-center gap-2">
-          <LanguageSwitch />
+          {/* Phones have no room for the language switch next to the room controls;
+              the choice is remembered from the dashboard anyway. */}
+          <span className="hidden sm:contents">
+            <LanguageSwitch />
+          </span>
           <SoundToggle />
           {fullscreen.supported && (
             <button
@@ -222,7 +218,7 @@ export default function HostGame() {
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="flex flex-1 flex-col px-4 pb-24 sm:px-8">
+      <main id="main" tabIndex={-1} className="flex flex-1 flex-col px-4 pb-28 sm:px-8 sm:pb-24">
         {snapshot.status === 'lobby' && (
           <HostLobby snapshot={snapshot} sessionId={sessionId} onStart={() => void hostStart()} />
         )}
@@ -254,13 +250,23 @@ export default function HostGame() {
       </main>
 
       {canNext && (
-        <div className="fixed right-4 bottom-4 z-30 flex flex-col items-end gap-1 sm:right-8 sm:bottom-8">
-          <Button size="xl" onClick={next} data-testid="host-next" className="shadow-card">
-            {nextLabel}
-            <ChevronRight className="size-6" aria-hidden="true" />
-          </Button>
-          <span className="text-xs text-fg-muted">{t('game.hostShortcuts')}</span>
-        </div>
+        <>
+          {/* Phones: a full-width pinned action with a scrim, matching the lobby's start button.
+              The keyboard hint only makes sense where there is a keyboard. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-bg via-bg/90 to-transparent sm:hidden"
+          />
+          <div className="fixed inset-x-4 bottom-4 z-30 flex flex-col items-stretch gap-1 sm:inset-x-auto sm:right-8 sm:bottom-8 sm:items-end">
+            <Button size="xl" onClick={next} data-testid="host-next" className="shadow-card">
+              {nextLabel}
+              <ChevronRight className="size-6" aria-hidden="true" />
+            </Button>
+            <span className="hidden text-xs text-fg-muted sm:inline">
+              {t('game.hostShortcuts')}
+            </span>
+          </div>
+        </>
       )}
     </div>
   )
@@ -301,7 +307,7 @@ function HostLobby({
       data-testid="host-lobby"
     >
       <section className="flex flex-col items-center justify-center gap-4 text-center">
-        <p className="text-xl text-fg-muted sm:text-2xl">
+        <p className="text-base text-balance text-fg-muted sm:text-xl md:text-2xl">
           {t('game.joinAt')} <span className="font-heading font-bold text-fg">{joinHost}</span> ·{' '}
           {t('game.pin')}
         </p>
@@ -332,8 +338,11 @@ function HostLobby({
             />
           </div>
           <p className="text-sm text-fg-muted">{t('game.scanQr')}</p>
-          <div className="inline-flex max-w-full items-center gap-1 rounded-lg bg-bg-elev pl-3">
-            <code className="truncate py-1 text-sm text-fg-muted" data-testid="join-url">
+          <div className="flex w-full max-w-sm items-center gap-1 rounded-xl bg-bg-elev py-1 pr-1 pl-3 sm:w-auto">
+            <code
+              className="min-w-0 flex-1 truncate text-left text-xs text-fg-muted sm:text-sm"
+              data-testid="join-url"
+            >
               {joinUrl}
             </code>
             <CopyLinkButton text={joinUrl} />
@@ -370,7 +379,7 @@ function HostLobby({
         </ul>
       </section>
 
-      <aside className="card flex flex-col gap-4 p-5">
+      <aside className="card flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold">
             <Users className="size-5 text-teal" aria-hidden="true" />
@@ -380,10 +389,11 @@ function HostLobby({
             {snapshot.players.length}
           </span>
         </div>
-        <p className="text-sm text-fg-muted">
+        {/* The count is already the big number above; the sentence only earns its space on desktop. */}
+        <p className="hidden text-sm text-fg-muted lg:block">
           {t('count.players', { count: snapshot.players.length })}
         </p>
-        <div className="min-h-32 flex-1">
+        <div className="min-h-0 flex-1 lg:min-h-32">
           {snapshot.players.length === 0 ? (
             <p className="animate-pulse text-fg-muted">{t('game.noPlayersYet')}</p>
           ) : isTeam ? (
@@ -403,18 +413,25 @@ function HostLobby({
             <PlayerChips players={snapshot.players} onKick={kick} reduced={reduced} />
           )}
         </div>
-        <Button
-          size="xl"
-          block
-          disabled={snapshot.players.length === 0}
-          onClick={onStart}
-          data-testid="host-start"
-        >
-          {t('game.start')}
-        </Button>
         {snapshot.players.length === 0 && (
           <p className="text-center text-sm text-fg-muted">{t('game.startHint')}</p>
         )}
+        {/* On phones the lobby is taller than the screen, so the primary action
+            follows the host down the page instead of hiding under the player list.
+            The scrim keeps content that scrolls beneath it legible. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-bg via-bg/90 to-transparent lg:hidden"
+        />
+        <Button
+          size="xl"
+          disabled={snapshot.players.length === 0}
+          onClick={onStart}
+          data-testid="host-start"
+          className="fixed inset-x-4 bottom-4 z-30 shadow-card lg:static lg:inset-auto lg:w-full lg:shadow-none"
+        >
+          {t('game.start')}
+        </Button>
       </aside>
     </div>
   )
@@ -484,25 +501,35 @@ function QuestionHeader({
   const total = isQuestion
     ? (liveCount?.totalPlayers ?? snapshot.players.length)
     : (snapshot.reveal?.totalPlayers ?? snapshot.players.length)
+  const progress = t('game.questionOf', { index: question.index + 1, total: question.total })
+  const answeredLong = t('game.answered', { count: answered, total })
   return (
-    <div className="flex items-center gap-4 py-3">
+    // Phones get one compact row: "2/5 · 👥 3 з 4 · (timer)". Labels are spelled out from `sm`.
+    <div className="flex items-center gap-2 py-2 sm:gap-4 sm:py-3">
       <span
-        className="rounded-full bg-bg-elev px-4 py-1.5 text-base font-semibold text-fg-muted sm:text-lg"
+        className="rounded-full bg-bg-elev px-3 py-1 text-sm font-semibold whitespace-nowrap text-fg-muted tabular sm:px-4 sm:py-1.5 sm:text-lg"
         data-testid="host-question-progress"
       >
-        {t('game.questionOf', { index: question.index + 1, total: question.total })}
+        <span aria-hidden="true" className="sm:hidden">
+          {question.index + 1}/{question.total}
+        </span>
+        <span className="sr-only sm:not-sr-only">{progress}</span>
       </span>
-      <span className="hidden rounded-full bg-bg-elev px-4 py-1.5 text-base text-fg-muted sm:inline">
+      <span className="hidden rounded-full bg-bg-elev px-4 py-1.5 text-base whitespace-nowrap text-fg-muted sm:inline">
         {t(`game.questionTypes.${question.type}`)}
       </span>
-      <div className="ml-auto flex items-center gap-4">
+      <div className="ml-auto flex items-center gap-2 sm:gap-4">
         {question.type !== 'info' && (
           <span
-            className="rounded-full bg-bg-elev px-4 py-1.5 font-heading text-lg tabular sm:text-2xl"
+            className="inline-flex items-center gap-1.5 rounded-full bg-bg-elev px-3 py-1 font-heading text-base whitespace-nowrap tabular sm:px-4 sm:py-1.5 sm:text-2xl"
             data-testid="answered-counter"
             aria-live="polite"
           >
-            {t('game.answered', { count: answered, total })}
+            <Users className="size-4 text-teal sm:hidden" aria-hidden="true" />
+            <span aria-hidden="true" className="sm:hidden">
+              {t('game.answeredShort', { count: answered, total })}
+            </span>
+            <span className="sr-only sm:not-sr-only">{answeredLong}</span>
           </span>
         )}
         {isQuestion && snapshot.deadline != null && (
@@ -510,6 +537,8 @@ function QuestionHeader({
             deadline={snapshot.deadline}
             startedAt={snapshot.discussionUntil ?? snapshot.questionStartedAt}
             size={112}
+            fluid
+            className="size-16 sm:size-24 md:size-28"
             ticks
           />
         )}
@@ -532,10 +561,12 @@ function HostQuestion({
   return (
     <div className="flex flex-1 flex-col gap-4" data-testid="host-question">
       <QuestionHeader snapshot={snapshot} question={question} />
-      <div className={cn('grid flex-1 gap-6', hasMedia && 'lg:grid-cols-[3fr_2fr]')}>
+      {/* On a projector the question floats in the free space; on a phone it stays at the top
+          so the options are reachable without scrolling. */}
+      <div className={cn('grid gap-4 sm:flex-1 sm:gap-6', hasMedia && 'lg:grid-cols-[3fr_2fr]')}>
         <div className="flex flex-col justify-center gap-4">
           <h1
-            className="font-heading text-[clamp(1.75rem,4vw,3.5rem)] leading-tight font-bold break-words [overflow-wrap:anywhere]"
+            className="font-heading text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere] sm:text-[clamp(1.75rem,4vw,3.5rem)]"
             data-testid="host-question-text"
           >
             {question.text}
@@ -546,7 +577,7 @@ function HostQuestion({
         </div>
         {hasMedia && (
           <div className="flex items-center justify-center">
-            <Media url={question.mediaUrl} autoplay className="max-h-[45vh]" />
+            <Media url={question.mediaUrl} autoplay className="max-h-[30vh] sm:max-h-[45vh]" />
           </div>
         )}
       </div>
@@ -558,10 +589,8 @@ function HostQuestion({
         <p className="text-center text-lg text-fg-muted">{t('game.infoSlide')}</p>
       ) : (
         <div
-          className={cn(
-            'grid gap-3 sm:gap-4',
-            question.options.length <= 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2',
-          )}
+          // A list on phones, like the player screen: two host-sized tiles side by side clip their text.
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
           data-testid="host-options"
         >
           {question.options.map((o, i) => (
@@ -620,10 +649,14 @@ function HostReveal({ snapshot, question }: { snapshot: GameSnapshot; question: 
           {question.text}
         </h1>
         <span
-          className="rounded-full bg-success/20 px-4 py-2 font-heading text-xl font-bold text-success tabular"
+          className="rounded-full bg-success/20 px-3 py-1.5 font-heading text-lg font-bold whitespace-nowrap text-success tabular sm:px-4 sm:py-2 sm:text-xl"
           data-testid="correct-percent"
         >
-          {t('game.correctPercent', { percent })}
+          {/* Phones show just "n%"; the word "правильно" returns from `sm`, and screen readers always hear it. */}
+          <span aria-hidden="true" className="sm:hidden">
+            {percent}%
+          </span>
+          <span className="sr-only sm:not-sr-only">{t('game.correctPercent', { percent })}</span>
         </span>
       </div>
       {question.type === 'text' ? (
