@@ -57,11 +57,13 @@ export function OptionButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'relative flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-2xl text-left transition-[transform,opacity,box-shadow] duration-150',
+        'relative block w-full overflow-hidden rounded-2xl text-left transition-[transform,opacity,box-shadow] duration-150',
         'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
         shape.bg,
         shape.onBg,
-        isHost ? 'p-5 md:p-7' : 'p-4',
+        // Host tiles size to their OWN width (container queries), not the viewport: the same tile
+        // is ~900px wide on the question screen but ~300px in the reveal's two-column list.
+        isHost && '@container',
         onClick && !disabled && 'active:scale-[0.98]',
         selected && 'ring-4 ring-fg ring-offset-2 ring-offset-bg',
         dim && 'opacity-40',
@@ -71,62 +73,81 @@ export function OptionButton({
         className,
       )}
     >
+      {/* Layout lives on an inner row: a container can't query its own size, so the padding
+          that depends on the tile width has to sit one level down. */}
       <span
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-xl bg-black/15',
-          isHost ? 'size-14 md:size-20' : showText ? 'size-12' : 'size-20',
+          'flex min-h-11 w-full items-center gap-3',
+          isHost ? 'p-3 @md:p-5 @2xl:p-7' : 'p-4',
         )}
-        aria-hidden="true"
       >
-        <shape.Icon
-          className={cn(isHost ? 'size-9 md:size-12' : showText ? 'size-7' : 'size-12')}
-        />
+        <span
+          className={cn(
+            'flex shrink-0 items-center justify-center rounded-xl bg-black/15',
+            isHost ? 'size-10 @md:size-14 @2xl:size-20' : showText ? 'size-12' : 'size-20',
+          )}
+          aria-hidden="true"
+        >
+          <shape.Icon
+            className={cn(
+              isHost ? 'size-6 @md:size-9 @2xl:size-12' : showText ? 'size-7' : 'size-12',
+            )}
+          />
+        </span>
+        {showText ? (
+          <span
+            className={cn(
+              // min-w-0 lets long answers wrap instead of pushing the vote count out of the tile.
+              'min-w-0 flex-1 font-heading font-semibold break-words [overflow-wrap:anywhere]',
+              isHost ? 'text-[clamp(1.125rem,5cqi,2.4rem)] leading-tight' : 'text-lg leading-snug',
+            )}
+          >
+            {text}
+          </span>
+        ) : (
+          <span className="sr-only">{shapeName}</span>
+        )}
+        {typeof count === 'number' && (
+          <span
+            className={cn(
+              'ml-auto shrink-0 rounded-full bg-black/25 px-3 py-1 font-heading font-bold tabular',
+              isHost ? 'text-lg @md:text-2xl @2xl:text-3xl' : 'text-base',
+            )}
+          >
+            {count}
+          </span>
+        )}
+        {outcome === 'correct' || outcome === 'missed' ? (
+          <span
+            className={cn(
+              'flex shrink-0 items-center justify-center rounded-full bg-success text-fg-on-accent',
+              // Host tiles carry a vote count on the right, so a corner badge would sit on it;
+              // there the badge joins the row after the count. Player tiles keep the corner.
+              isHost ? 'size-8 @md:size-10 @2xl:size-12' : 'absolute top-2 right-2 size-8',
+            )}
+          >
+            <Check
+              className={isHost ? 'size-5 @md:size-6 @2xl:size-7' : 'size-5'}
+              aria-hidden="true"
+            />
+            <span className="sr-only">{t('a11y.optionCorrect')}</span>
+          </span>
+        ) : null}
+        {outcome === 'incorrect' && selected ? (
+          <span
+            className={cn(
+              'flex shrink-0 items-center justify-center rounded-full bg-error text-fg-on-accent',
+              isHost ? 'size-8 @md:size-10 @2xl:size-12' : 'absolute top-2 right-2 size-8',
+            )}
+          >
+            <X className={isHost ? 'size-5 @md:size-6 @2xl:size-7' : 'size-5'} aria-hidden="true" />
+            <span className="sr-only">{t('a11y.optionIncorrect')}</span>
+          </span>
+        ) : null}
+        {selected && outcome === null ? (
+          <span className="sr-only">{t('play.selected')}</span>
+        ) : null}
       </span>
-      {showText ? (
-        <span
-          className={cn(
-            'font-heading font-semibold break-words [overflow-wrap:anywhere]',
-            isHost ? 'text-[clamp(1.25rem,2.4vw,2.4rem)] leading-tight' : 'text-lg leading-snug',
-          )}
-        >
-          {text}
-        </span>
-      ) : (
-        <span className="sr-only">{shapeName}</span>
-      )}
-      {typeof count === 'number' && (
-        <span
-          className={cn(
-            'ml-auto shrink-0 rounded-full bg-black/25 px-3 py-1 font-heading font-bold tabular',
-            isHost ? 'text-2xl md:text-3xl' : 'text-base',
-          )}
-        >
-          {count}
-        </span>
-      )}
-      {outcome === 'correct' || outcome === 'missed' ? (
-        <span
-          className={cn(
-            'absolute top-2 right-2 flex items-center justify-center rounded-full bg-success text-fg-on-accent',
-            isHost ? 'size-10' : 'size-8',
-          )}
-        >
-          <Check className={isHost ? 'size-6' : 'size-5'} aria-hidden="true" />
-          <span className="sr-only">{t('a11y.optionCorrect')}</span>
-        </span>
-      ) : null}
-      {outcome === 'incorrect' && selected ? (
-        <span
-          className={cn(
-            'absolute top-2 right-2 flex items-center justify-center rounded-full bg-error text-fg-on-accent',
-            isHost ? 'size-10' : 'size-8',
-          )}
-        >
-          <X className={isHost ? 'size-6' : 'size-5'} aria-hidden="true" />
-          <span className="sr-only">{t('a11y.optionIncorrect')}</span>
-        </span>
-      ) : null}
-      {selected && outcome === null ? <span className="sr-only">{t('play.selected')}</span> : null}
     </button>
   )
 }
